@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from .preprocess import load_sequences
+from .sequence_generator import load_sequences
 
 
 class PaddedBatchIterator(object):
@@ -30,7 +30,8 @@ class PaddedBatchIterator(object):
         last_time_sequence = None
         if self.save_last_time:
             if self.diff is True:
-                last_time_sequence = np.array([sequence[-2][0] - sequence[0][0] for sequence in sequences])
+                last_time_sequence = np.array(
+                    [sequence[-2][0] - sequence[0][0] for sequence in sequences])
             else:
                 # accumulate time
                 last_time_sequence = []
@@ -43,7 +44,8 @@ class PaddedBatchIterator(object):
         if self.mark is True:
             batch_sequences = np.zeros([batch_size, max_length, 2], dtype=np.float32)
             if self.diff:
-                target = np.array([[sequence[-1][0] - sequence[-2][0], sequence[-1][1]] for sequence in sequences])
+                target = np.array([[sequence[-1][0] - sequence[-2][0], sequence[-1][1]]
+                                   for sequence in sequences])
             else:
                 target = np.array([[sequence[-1][0], sequence[-1][1]] for sequence in sequences])
         else:
@@ -60,12 +62,16 @@ class PaddedBatchIterator(object):
 
         if self.diff is True:
             if self.mark is True:
-                batch_time_sequences = np.concatenate([batch_sequences[:, 0:1, 0:1] * 0,
-                                                       np.diff(batch_sequences[:, :, 0:1], axis=1)], axis=1)
-                batch_sequences = np.concatenate([batch_time_sequences, batch_sequences[:, :, 1:]], axis=2)
+                batch_time_sequences = np.concatenate(
+                    [batch_sequences[:, 0:1, 0:1] * 0,
+                     np.diff(batch_sequences[:, :, 0:1], axis=1)],
+                    axis=1)
+                batch_sequences = np.concatenate([batch_time_sequences, batch_sequences[:, :, 1:]],
+                                                 axis=2)
             else:
-                batch_sequences = np.concatenate([batch_sequences[:, 0:1, 0:] * 0, np.diff(batch_sequences, axis=1)],
-                                                 axis=1)
+                batch_sequences = np.concatenate(
+                    [batch_sequences[:, 0:1, 0:] * 0,
+                     np.diff(batch_sequences, axis=1)], axis=1)
             for idx, sl in enumerate(length):
                 if sl < max_length:
                     batch_sequences[idx, sl, 0] = 0.0
@@ -80,4 +86,3 @@ if __name__ == '__main__':
     data_batch_iterator.shuffle()
     batch_size = 10
     print(data_batch_iterator.next_batch(batch_size))
-
