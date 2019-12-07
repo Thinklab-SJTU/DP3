@@ -7,7 +7,7 @@ class BaseConfigurator(object):
     def __init__(self, config):
         self._config = config
         if not os.path.isdir(self.SAVE_DIR):
-            os.mkdir(self.SAVE_DIR)
+            os.makedirs(self.SAVE_DIR)
 
     @property
     def DATASET_NAME(self):
